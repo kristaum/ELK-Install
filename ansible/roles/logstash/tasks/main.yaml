@@ -1,0 +1,14 @@
+---
+- name: Install logstash package
+  yum:
+    name:  "https://artifacts.elastic.co/downloads/logstash/logstash-{{ elkstack_version }}.rpm"
+    state: present
+  register: install_logstash
+
+- name: Enable service on boot and start it
+  systemd:
+    name:            logstash
+    daemon_reload:  yes
+    enabled:        yes
+    state:          restarted
+  when: install_logstash is success

@@ -1,0 +1,10 @@
+---
+  - name: Ad proxy on yum conf file when on private network
+    lineinfile:
+      path: /etc/yum.conf
+      line: 'proxy=XXXXXXXXXX'
+
+  - name: install java
+    yum:
+      name: "java-{{ jdk_version }}-openjdk-devel"
+      state: present

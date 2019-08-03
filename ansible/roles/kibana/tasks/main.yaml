@@ -1,0 +1,67 @@
+---
+- name: Install kibana package
+  yum:
+    name:  "https://artifacts.elastic.co/downloads/kibana/kibana-{{ elkstack_version }}-x86_64.rpm"
+    state: present
+  register: install_kibana
+
+- name: Copy kibana.yml file with custom configuration
+  copy:
+    src:    files/kibana.yml
+    dest:   /etc/kibana/kibana.yml
+    owner:  root
+    group:  root
+    mode:   '0644'
+  when: install_kibana is success
+  register: configure_kibana
+
+- name: Enable service on boot and start it
+  systemd:
+    name:           kibana
+    daemon_reload:  yes
+    enabled:        yes
+    state:          restarted
+  when: configure_kibana is success
+  register: kibana_installed
+
+- name: Install/update epel-release package
+  yum:
+    name:  epel-release
+    state: present
+  when: kibana_installed is success
+  register: update_epel
+
+- name: Install install nginx
+  yum:
+    name:  nginx
+    state: present
+  when: update_epel is success
+  register: install_nginx
+
+- name: Copy kibana.conf with nginx configuration
+  copy:
+    src:    files/kibana.conf
+    dest:   /etc/nginx/conf.d/kibana.conf
+    owner:  root
+    group:  root
+    mode:   '0644'
+  when: install_nginx is success
+  register: config_kibana_nginx
+
+- name: Copy htpasswd.kibana with nginx configuration
+  copy:
+    src:    files/htpasswd.kibana
+    dest:   /etc/nginx/htpasswd.kibana
+    owner:  root
+    group:  root
+    mode:   '0644'
+  when: config_kibana_nginx is success
+  register: htpasswd_config
+
+- name: Enable service on boot and start it
+  systemd:
+    name:           nginx
+    daemon_reload:  yes
+    enabled:        yes
+    state:          restarted
+  when: htpasswd_config is success

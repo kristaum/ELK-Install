@@ -1,0 +1,15 @@
+[all:vars]
+ansible_connection=ssh
+ansible_user=#USER
+ansible_ssh_pass=$USER_PW
+ansible_sudo_pass=$USER_PW
+
+
+[elastic]
+XX.XXX.XX.XX
+
+[kibana]
+XX.XXX.XX.XX
+
+[logstash]
+XX.XXX.XX.XX

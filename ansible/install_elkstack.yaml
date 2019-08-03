@@ -1,0 +1,46 @@
+---
+  - name: Configure timezone
+    hosts: all
+    become: true
+    roles:
+      - role: timezone
+
+  - name: Install java all machines
+    hosts: all
+    become: true
+    roles:
+      - role: java
+        vars:
+          jdk_version: "1.8.0"
+
+  - name: Install Elasticsearch
+    hosts: elastic
+    become: true
+    roles:
+      - role: elastic
+        vars:
+          elkstack_version: "6.6.1"
+
+  - name: Install kibana
+    hosts: kibana
+    become: true
+    roles:
+      - role: kibana
+        vars:
+          elkstack_version: "6.6.1"
+
+  - name: Install logstash
+    hosts: logstash
+    become: true
+    roles:
+      - role: logstash
+        vars:
+          elkstack_version: "6.6.1"
+
+  - name: Configure zabbix
+    hosts: all
+    become: true
+    roles:
+      - role: zabbix
+        vars:
+          zabbix_agent: "https://repo.zabbix.com/zabbix/3.0/rhel/7/x86_64/zabbix-agent-3.0.14-1.el7.x86_64.rpm"

@@ -1,0 +1,24 @@
+---
+- name: Install zabbix package
+  yum:
+    name:  "{{ zabbix_agent }}"
+    state: present
+  register: install_zabbix
+
+- name: Configure Client Zabbix - zabbix_agentd.conf
+  copy:
+    src:    files/zabbix_agentd.conf
+    dest:   /etc/zabbix/zabbix_agentd.conf
+    owner:  root
+    group:  root
+    mode:   '0644'
+  when:     install_zabbix is success
+  register: configure_zabbix
+
+- name: Enable service on boot and start it
+  systemd:
+    name:           zabbix-agent
+    daemon_reload:  yes
+    enabled:        yes
+    state:          started
+  when: configure_zabbix is success

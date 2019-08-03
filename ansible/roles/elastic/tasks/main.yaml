@@ -1,0 +1,51 @@
+---
+- name: Add elastic.co key
+  rpm_key:
+      state: present
+      key:   https://artifacts.elastic.co/GPG-KEY-elasticsearch
+  register: elastic_key
+
+- name: Install elastic package
+  yum:
+     name:  "https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-{{ elkstack_version }}.rpm"
+     state: present
+  when: elastic_key is success
+  register: install_elastic
+
+- name: Copy elasticsearch.yml file with custom configuration
+  copy:
+    src:    files/elasticsearch.yml
+    dest:   /etc/elasticsearch/elasticsearch.yml
+    owner:  root
+    group:  elasticsearch
+    mode:   '0660'
+  when: install_elastic is success
+  register: elastic_yaml_configuration
+
+- name: Copy elasticsearch.service file with custom configuration
+  copy:
+    src:    files/elasticsearch.service
+    dest:   /usr/lib/systemd/system/elasticsearch.service
+    owner:  root
+    group:  root
+    mode:   '0644'
+  when: elastic_yaml_configuration is success
+  register: elastic_svc_configuration
+
+- name: Copy elasticsearch file with custom configuration
+  copy:
+    src:    files/elasticsearch
+    dest:   /etc/sysconfig/elasticsearch
+    owner:  root
+    group:  elasticsearch
+    mode:   '0660'
+  when: elastic_svc_configuration is success
+  register: elastic_sys_configuration
+
+- name: Enable service on boot and start it
+  systemd:
+    name:           elasticsearch
+    daemon_reload:  yes
+    enabled:        yes
+    state:          restarted
+  when: elastic_sys_configuration is success

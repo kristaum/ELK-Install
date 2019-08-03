@@ -1,0 +1,5 @@
+---
+- name: Set timezone all servers
+  command: timedatectl set-timezone America/Sao_Paulo
+  args:
+    warn: false
